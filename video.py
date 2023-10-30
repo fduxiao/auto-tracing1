@@ -37,6 +37,7 @@ class VideoCapture:
         for key, value in relation_map.items():
             if value is not None:
                 self.cap.set(key, value)
+        return self
 
     @property
     def opened(self):

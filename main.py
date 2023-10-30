@@ -37,7 +37,8 @@ class Loop:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("settings", default=None, help="a python module containing everything")
+    parser.add_argument("settings", nargs='?', default="settings.py",
+                        help="a python module containing everything")
 
     args = parser.parse_args()
     with open(args.settings, "r") as file:
@@ -46,7 +47,7 @@ def main():
     exec(content, settings.__dict__)
 
     loop = Loop(
-        cap=VideoCapture(settings.device, api_preference=settings.api_preference)
+        cap=VideoCapture(settings.device, api_preference=settings.api_preference).set(**settings.camera_settings)
     )
     loop.run()
 
