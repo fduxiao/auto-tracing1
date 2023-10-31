@@ -35,6 +35,12 @@ class Loop:
         return True
 
 
+class Settings(ModuleType):
+    device: str = ""
+    api_preference = cv2.CAP_ANY
+    camera_settings = dict()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("settings", nargs='?', default="settings.py",
@@ -43,7 +49,7 @@ def main():
     args = parser.parse_args()
     with open(args.settings, "r") as file:
         content = file.read()
-    settings = ModuleType("settings")
+    settings = Settings("settings")
     exec(content, settings.__dict__)
 
     loop = Loop(
