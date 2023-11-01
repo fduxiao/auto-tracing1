@@ -6,8 +6,6 @@ import argparse
 import platform
 from types import ModuleType
 
-# I don't know why without this I encountered an ImportError on Nvidia Jetpack
-import torch as _
 import cv2
 
 from timer import Timer
