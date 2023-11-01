@@ -78,7 +78,7 @@ class Controller:
         self.y.reset()
         return self
 
-    def execute(self, box, width, height):
+    def execute(self, box):
         self.time_diff = time_diff = self.timer.diff()
         if time_diff is None:
             return
@@ -86,10 +86,6 @@ class Controller:
         x1, y1, x2, y2 = box
         x = (x1 + x2) / 2
         y = (y1 + y2) / 2
-
-        # use ratio instead of pixel
-        x /= width
-        y /= height
 
         ex = self.x.execute(x, time_diff)
         ey = self.y.execute(y, time_diff)

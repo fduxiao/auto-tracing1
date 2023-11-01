@@ -24,7 +24,8 @@ def put_text(mat, text, origin, scale: float = 1, color=(0, 255, 0), thickness=2
 
 
 class Loop:
-    def __init__(self, cap: VideoCapture, face: Face, pid: Controller, title="video", draw_scale=1, draw_thickness=2):
+    def __init__(self, cap: VideoCapture, face: Face, resize_ratio,
+                 pid: Controller, title="video", draw_scale=1, draw_thickness=2):
         self.cap = cap
         self.title = title
         self.face = face
@@ -33,6 +34,7 @@ class Loop:
         self.draw_thickness = draw_thickness
         self.timer = Timer()
         self.pid = pid
+        self.resize_ratio = resize_ratio
 
     def run(self):
         while True:
@@ -52,9 +54,17 @@ class Loop:
             return False
 
         height, width = frame.shape[:2]
-        box = self.face.detect(frame)
+        resized = cv2.resize(frame, (int_round(width * self.resize_ratio), int_round(height * self.resize_ratio)))
+        box = self.face.detect(resized)
+
         if box is not None:
-            self.pid.execute(box, width, height)
+            box_height, box_width = resized.shape[:2]
+            box[0] /= box_width
+            box[2] /= box_width
+
+            box[1] /= box_height
+            box[3] /= box_height
+            self.pid.execute(box)
         else:
             self.pid.reset()
 
@@ -74,7 +84,9 @@ class Loop:
 
             if box is not None:
                 x1, y1, x2, y2 = box
-                cv2.rectangle(frame, (int_round(x1), int_round(y1)), (int_round(x2), int_round(y2)),
+                cv2.rectangle(frame,
+                              (int_round(x1 * width), int_round(y1 * height)),
+                              (int_round(x2 * width), int_round(y2 * height)),
                               (255, 0, 0), thickness)
 
             draw_text(f"pid info: time diff {self.pid.time_diff}", (50, 100))
@@ -92,6 +104,7 @@ class Loop:
 
 
 class Settings(ModuleType):
+    resize_ratio = 0.5
     device: str = ""
     draw_scale = 1
     draw_thickness: int = 2
@@ -131,6 +144,7 @@ def main():
         motion = Motion(**settings.motion_settings)
 
     loop = Loop(
+        resize_ratio=settings.resize_ratio,
         cap=VideoCapture(settings.device, api_preference=settings.api_preference).set(**settings.camera_settings),
         face=Face(settings.face_detection_device),
         pid=Controller(motion, **settings.pid_settings),
