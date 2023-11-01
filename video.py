@@ -21,7 +21,7 @@ class VideoCapture:
         self.cap.release()
 
     def set(self, width=None, height=None, fps=None, brightness=None, contrast=None, saturation=None,
-            hue=None, exposure=None):
+            hue=None, exposure=None, fourcc=None):
 
         relation_map = {
             cv2.CAP_PROP_FRAME_WIDTH: width,
@@ -32,6 +32,7 @@ class VideoCapture:
             cv2.CAP_PROP_SATURATION: saturation,
             cv2.CAP_PROP_HUE: hue,
             cv2.CAP_PROP_EXPOSURE: exposure,
+            cv2.CAP_PROP_FOURCC: fourcc,
         }
 
         for key, value in relation_map.items():
