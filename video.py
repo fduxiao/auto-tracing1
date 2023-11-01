@@ -49,4 +49,7 @@ class VideoCapture:
 
         :return: (bool, np.ndarray)
         """
-        return self.cap.read()
+        ret, frame = self.cap.read()
+        if ret:
+            frame = cv2.flip(frame, 1)
+        return ret, frame
