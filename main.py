@@ -55,7 +55,8 @@ class Loop:
         box = self.face.detect(frame)
         if box is not None:
             self.pid.execute(box, width, height)
-        self.pid.reset()
+        else:
+            self.pid.reset()
 
         # drawing
         if self.debug:

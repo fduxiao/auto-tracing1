@@ -9,20 +9,37 @@ from motion import Motion
 @dataclass
 class PID:
     target: float = 0
-    diff: float = 0
+    e: float = 0  # execution amount
+
+    error: float = 0
+    prev_error: float = 0
+
     p: float = 0
     i: float = 0
     d: float = 0
-    e: float = 0  # execution amount
 
-    def execute(self, x, time, time_epsilon=0.001):
-        self.diff = x - self.target
-        self.d = self.diff / (time + time_epsilon)
-        # a naive strategy
-        if self.diff > 100:
-            self.e = 1
-        if self.diff < -100:
-            self.e = -1
+    # coefficients
+    kp: float = 0
+    ki: float = 0
+    kd: float = 0
+    # lower and upper bound of i
+    min_i: float = -10
+    max_i: float = 10
+
+    def execute(self, x, dt, time_epsilon=0.001):
+        # update d
+        self.error = x - self.target
+        self.d = (self.error - self.prev_error) / (dt + time_epsilon)
+        self.prev_error = self.error
+
+        # update i
+        self.i += self.error * dt
+        if self.i < self.min_i:
+            self.i = self.min_i
+        if self.i > self.max_i:
+            self.i = self.max_i
+
+        self.e = self.kp * self.error + self.ki * self.i + self.kd * self.d
         return self.e
 
     def reset(self):
@@ -36,14 +53,19 @@ class Controller:
     the pos of the box of face. The goal of PID is to adjust the servo motors so that the center of the
     box will be at the predefined target point.
     """
-    def __init__(self, motion: Motion = None, target_point=(0.5, 0.3)):
+    def __init__(self, motion: Motion = None, target_point=(0.5, 0.3),
+                 pid_x: dict = None, pid_y: dict = None):
         self.motion = motion
         self.target_point = target_point
         self.timer = Timer()
         self.time_diff = 0
 
-        self.x = PID(target_point[0])
-        self.y = PID(target_point[1])
+        if pid_x is None:
+            pid_x = dict(kp=0, ki=0, kd=0)
+        if pid_y is None:
+            pid_y = dict(kp=0, ki=0, kd=0)
+        self.x = PID(target_point[0], **pid_x)
+        self.y = PID(target_point[1], **pid_y)
 
     def reset(self):
         self.x.reset()
