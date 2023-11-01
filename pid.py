@@ -27,8 +27,9 @@ class PID:
     max_i: float = 10
 
     def execute(self, x, dt, time_epsilon=0.001):
-        # update d
         self.error = x - self.target
+        self.p = self.kp * self.error
+        # update d
         self.d = (self.error - self.prev_error) / (dt + time_epsilon)
         self.prev_error = self.error
 
@@ -39,7 +40,7 @@ class PID:
         if self.i > self.max_i:
             self.i = self.max_i
 
-        self.e = self.kp * self.error + self.ki * self.i + self.kd * self.d
+        self.e = self.p + self.ki * self.i + self.kd * self.d
         return self.e
 
     def reset(self):
