@@ -66,7 +66,7 @@ class ServoChannel:
         servo.actuation_range = self.actual_range
         servo.set_pulse_width_range(self.min_pulse, self.max_pulse)
         self.servo = servo
-        self.set_angle(self.angle)
+        self.angle = servo.angle
         return self
 
 
