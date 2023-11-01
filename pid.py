@@ -18,10 +18,15 @@ class PID:
     def execute(self, x, time, time_epsilon=0.001):
         self.diff = x - self.target
         self.d = self.diff / (time + time_epsilon)
+        # a naive strategy
+        if self.diff > 100:
+            self.e = 1
+        if self.diff < -100:
+            self.e = -1
         return self.e
 
 
-class MatPID:
+class Controller:
     """
     PID control class, which has an instance of :py:class:`Motion`, an instance of :py:class:`Timer` and
     the pos of the box of face. The goal of PID is to adjust the servo motors so that the center of the

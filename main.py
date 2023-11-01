@@ -11,7 +11,7 @@ import cv2
 from timer import Timer
 from video import VideoCapture
 from face import Face
-from pid import MatPID
+from pid import Controller
 from motion import Motion
 
 
@@ -24,7 +24,7 @@ def put_text(mat, text, origin, scale: float=1, color=(0, 255, 0), thickness=2):
 
 
 class Loop:
-    def __init__(self, cap: VideoCapture, face: Face, pid: MatPID, title="video", draw_scale=1, draw_thickness=2):
+    def __init__(self, cap: VideoCapture, face: Face, pid: Controller, title="video", draw_scale=1, draw_thickness=2):
         self.cap = cap
         self.title = title
         self.face = face
@@ -129,7 +129,7 @@ def main():
     loop = Loop(
         cap=VideoCapture(settings.device, api_preference=settings.api_preference).set(**settings.camera_settings),
         face=Face(settings.face_detection_device),
-        pid=MatPID(motion, **settings.pid_settings),
+        pid=Controller(motion, **settings.pid_settings),
         draw_scale=settings.draw_scale, draw_thickness=settings.draw_thickness
     )
     loop.run()
