@@ -19,7 +19,7 @@ def int_round(x):
     return int(round(x))
 
 
-def put_text(mat, text, origin, scale: float=1, color=(0, 255, 0), thickness=2):
+def put_text(mat, text, origin, scale: float = 1, color=(0, 255, 0), thickness=2):
     cv2.putText(mat, text, origin, cv2.FONT_HERSHEY_SIMPLEX, scale, color, thickness)
 
 
@@ -51,21 +51,24 @@ class Loop:
             print(f"cannot read {self.cap}")
             return False
 
+        height, width = frame.shape[:2]
         box = self.face.detect(frame)
         if box is not None:
-            self.pid.execute(box)
+            self.pid.execute(box, width, height)
+        self.pid.reset()
 
         # drawing
         if self.debug:
-            h, w = frame.shape[:2]
             thickness = self.draw_thickness
-            cv2.circle(frame, self.pid.target_point, 50, (0, 0, 255), thickness)
+            tx, ty = self.pid.target_point
+            cv2.circle(frame, (int_round(tx * width), int_round(ty * height)),
+                       radius=50, color=(0, 0, 255), thickness=thickness)
 
             def draw_text(text, origin, color=(0, 255, 0)):
                 put_text(frame, text, origin, scale=self.draw_scale, color=color, thickness=thickness)
 
             if frame_rate:
-                draw_text(f"fps: {frame_rate:.1f}", (w - 200, 50))
+                draw_text(f"fps: {frame_rate:.1f}", (width - 200, 50))
             draw_text("debug", (50, 50))
 
             if box is not None:

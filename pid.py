@@ -25,6 +25,10 @@ class PID:
             self.e = -1
         return self.e
 
+    def reset(self):
+        self.i = 0
+        return self
+
 
 class Controller:
     """
@@ -32,7 +36,7 @@ class Controller:
     the pos of the box of face. The goal of PID is to adjust the servo motors so that the center of the
     box will be at the predefined target point.
     """
-    def __init__(self, motion: Motion = None, target_point=(10, 10)):
+    def __init__(self, motion: Motion = None, target_point=(0.5, 0.3)):
         self.motion = motion
         self.target_point = target_point
         self.timer = Timer()
@@ -41,7 +45,12 @@ class Controller:
         self.x = PID(target_point[0])
         self.y = PID(target_point[1])
 
-    def execute(self, box):
+    def reset(self):
+        self.x.reset()
+        self.y.reset()
+        return self
+
+    def execute(self, box, width, height):
         self.time_diff = time_diff = self.timer.diff()
         if time_diff is None:
             return
@@ -49,6 +58,10 @@ class Controller:
         x1, y1, x2, y2 = box
         x = (x1 + x2) / 2
         y = (y1 + y2) / 2
+
+        # use ratio instead of pixel
+        x /= width
+        y /= height
 
         ex = self.x.execute(x, time_diff)
         ey = self.y.execute(y, time_diff)
