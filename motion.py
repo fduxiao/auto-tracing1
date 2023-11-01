@@ -52,7 +52,7 @@ class ServoChannel:
         return self.angle
 
     def set_offset(self, offset):
-        return self.set_offset(self.angle + offset)
+        return self.set_angle(self.angle + offset)
 
     @property
     def is_min(self):
