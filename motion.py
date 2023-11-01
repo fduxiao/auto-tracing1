@@ -94,6 +94,22 @@ class Motion:
         self.x_channel = x_channel.set_servo(Servo(self.pca.channels[x_channel.index]))
         self.y_channel = y_channel.set_servo(Servo(self.pca.channels[y_channel.index]))
 
+    @property
+    def x(self):
+        return self.x_channel.angle
+
+    @x.setter
+    def x(self, v):
+        self.x_channel.set_angle(v)
+
+    @property
+    def y(self):
+        return self.y_channel.angle
+
+    @y.setter
+    def y(self, v):
+        self.y_channel.set_angle(v)
+
     def set_x_offset(self, offset):
         self.x_channel.set_offset(offset)
 

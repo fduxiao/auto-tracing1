@@ -110,13 +110,18 @@ def load_settings(path):
     return settings
 
 
-def main():
+def settings_from_argument():
     parser = argparse.ArgumentParser()
     parser.add_argument("settings", nargs='?', default="settings.py",
                         help="a python module containing everything")
 
     args = parser.parse_args()
     settings = load_settings(args.settings)
+    return settings
+
+
+def main():
+    settings = settings_from_argument()
 
     # on OS X, I currently don't want to support the motion control on my macbook.
     motion = None
