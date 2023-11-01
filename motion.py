@@ -60,8 +60,8 @@ class ServoChannel:
         return self.angle >= self.end_angle - epsilon
 
     def set_servo(self, servo: Servo):
-        self.servo.actuation_range = self.end_angle - self.start_angle
-        self.servo.set_pulse_width_range(self.min_pulse, self.max_pulse)
+        servo.actuation_range = self.end_angle - self.start_angle
+        servo.set_pulse_width_range(self.min_pulse, self.max_pulse)
         self.servo = servo
         self.set_angle(self.angle)
         return self
