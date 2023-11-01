@@ -21,16 +21,18 @@ def int_round(x):
     return int(round(x))
 
 
-def put_text(mat, text, origin, scale=1, color=(0, 255, 0), thickness=2):
+def put_text(mat, text, origin, scale: float=1, color=(0, 255, 0), thickness=2):
     cv2.putText(mat, text, origin, cv2.FONT_HERSHEY_SIMPLEX, scale, color, thickness)
 
 
 class Loop:
-    def __init__(self, cap: VideoCapture, face: Face, pid: MatPID, title="video"):
+    def __init__(self, cap: VideoCapture, face: Face, pid: MatPID, title="video", draw_scale=1, draw_thickness=2):
         self.cap = cap
         self.title = title
         self.face = face
         self.debug = True
+        self.draw_scale = draw_scale
+        self.draw_thickness = draw_thickness
         self.timer = Timer()
         self.pid = pid
 
@@ -57,19 +59,25 @@ class Loop:
 
         # drawing
         if self.debug:
-            cv2.circle(frame, self.pid.target_point, 50, (0, 0, 255), 2)
             h, w = frame.shape[:2]
+            thickness = self.draw_thickness
+            cv2.circle(frame, self.pid.target_point, 50, (0, 0, 255), thickness)
+
+            def draw_text(text, origin, color=(0, 255, 0)):
+                put_text(frame, text, origin, scale=self.draw_scale, color=color, thickness=thickness)
+
             if frame_rate:
-                put_text(frame, f"fps: {frame_rate:.1f}", (w - 200, 50))
-            put_text(frame, "debug", (50, 50))
+                draw_text(f"fps: {frame_rate:.1f}", (w - 200, 50))
+            draw_text("debug", (50, 50))
 
             if box is not None:
                 x1, y1, x2, y2 = box
-                cv2.rectangle(frame, (int_round(x1), int_round(y1)), (int_round(x2), int_round(y2)), (255, 0, 0), 2)
+                cv2.rectangle(frame, (int_round(x1), int_round(y1)), (int_round(x2), int_round(y2)),
+                              (255, 0, 0), thickness)
 
-            put_text(frame, f"pid info: time diff {self.pid.time_diff}", (50, 100))
-            put_text(frame, f"x: {self.pid.x}", (50, 150))
-            put_text(frame, f"y: {self.pid.y}", (50, 200))
+            draw_text(f"pid info: time diff {self.pid.time_diff}", (50, 100))
+            draw_text(f"x: {self.pid.x}", (50, 150))
+            draw_text(f"y: {self.pid.y}", (50, 200))
 
         # show frame:
         cv2.imshow(self.title, frame)
@@ -83,6 +91,8 @@ class Loop:
 
 class Settings(ModuleType):
     device: str = ""
+    draw_scale = 1
+    draw_thickness: int = 2
     api_preference = cv2.CAP_ANY
     camera_settings = dict()
 
@@ -92,16 +102,21 @@ class Settings(ModuleType):
     pid_settings = dict()
 
 
+def load_settings(path):
+    with open(path, "r") as file:
+        content = file.read()
+    settings = Settings("settings")
+    exec(content, settings.__dict__)
+    return settings
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("settings", nargs='?', default="settings.py",
                         help="a python module containing everything")
 
     args = parser.parse_args()
-    with open(args.settings, "r") as file:
-        content = file.read()
-    settings = Settings("settings")
-    exec(content, settings.__dict__)
+    settings = load_settings(args.settings)
 
     # on OS X, I currently don't want to support the motion control on my macbook.
     motion = None
@@ -111,7 +126,8 @@ def main():
     loop = Loop(
         cap=VideoCapture(settings.device, api_preference=settings.api_preference).set(**settings.camera_settings),
         face=Face(settings.face_detection_device),
-        pid=MatPID(motion, **settings.pid_settings)
+        pid=MatPID(motion, **settings.pid_settings),
+        draw_scale=settings.draw_scale, draw_thickness=settings.draw_thickness
     )
     loop.run()
 
