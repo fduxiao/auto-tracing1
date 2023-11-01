@@ -8,15 +8,14 @@ from motion import Motion
 
 @dataclass
 class PID:
-    target: float = 0
     e: float = 0  # execution amount
-
-    error: float = 0
-    prev_error: float = 0
 
     p: float = 0
     i: float = 0
     d: float = 0
+
+    error: float = 0
+    prev_error: float = 0
 
     # coefficients
     kp: float = 0
@@ -25,6 +24,9 @@ class PID:
     # lower and upper bound of i
     min_i: float = -10
     max_i: float = 10
+
+    # target value
+    target: float = 0
 
     def execute(self, x, dt, time_epsilon=0.001):
         self.error = x - self.target
@@ -65,8 +67,8 @@ class Controller:
             pid_x = dict(kp=0, ki=0, kd=0)
         if pid_y is None:
             pid_y = dict(kp=0, ki=0, kd=0)
-        self.x = PID(target_point[0], **pid_x)
-        self.y = PID(target_point[1], **pid_y)
+        self.x = PID(target=target_point[0], **pid_x)
+        self.y = PID(target=target_point[1], **pid_y)
 
     def reset(self):
         self.x.reset()
