@@ -27,10 +27,13 @@ class ServoChannel:
     and the corresponding pulse width. Besides, the current angle is also maintained by this class
     """
     index: int
-    start_angle: float = 0
-    end_angle: float = 180
+    actual_range: int = 0
     min_pulse: int = 500
     max_pulse: int = 2500
+
+    start_angle: float = 0
+    end_angle: float = 180
+
     angle: float = None
     servo: Servo = None
 
@@ -45,7 +48,7 @@ class ServoChannel:
             angle = self.end_angle
         self.angle = angle
         if self.servo:
-            self.servo.angle = angle - self.start_angle
+            self.servo.angle = angle
         return self.angle
 
     def set_offset(self, offset):
@@ -60,7 +63,7 @@ class ServoChannel:
         return self.angle >= self.end_angle - epsilon
 
     def set_servo(self, servo: Servo):
-        servo.actuation_range = self.end_angle - self.start_angle
+        servo.actuation_range = self.actual_range
         servo.set_pulse_width_range(self.min_pulse, self.max_pulse)
         self.servo = servo
         self.set_angle(self.angle)
@@ -70,8 +73,8 @@ class ServoChannel:
 class Motion:
     def __init__(self, scl=SCL, sda=SDA,
                  frequency=50,
-                 x_channel=(0, 0, 180, 500, 2500),
-                 y_channel=(1, 0, 180, 500, 2500)):
+                 x_channel=(0, 180, 500, 2500, 10, 170),
+                 y_channel=(1, 180, 500, 2500, 10, 170)):
         """
         initialize necessary bits
 
