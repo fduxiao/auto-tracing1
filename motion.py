@@ -52,6 +52,8 @@ class ServoChannel:
         return self.angle
 
     def set_offset(self, offset):
+        if self.angle is None:
+            self.angle = self.actual_range / 2
         return self.set_angle(self.angle + offset)
 
     @property
